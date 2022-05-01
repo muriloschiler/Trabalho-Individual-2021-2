@@ -3,12 +3,27 @@ version: "3.1"
 services:
   db:
     container_name: db
-    ports: 
-      - 5432:5432
     image: postgres:latest
     restart: always
+    ports: 
+      - 5432:5432
     environment:
       POSTRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     volumes:
       - db_data:/var/lib/postgresql/data
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: bash -c "rm -f tmp/pids/server.pid && rails db:create db:migrate db:seed && bundle exec rails s -p 3000 -b '0.0.0.0'"
+    ports:
+      - 3000:3000
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+
+volumes:
+  db_data:
