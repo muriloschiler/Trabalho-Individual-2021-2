@@ -10,10 +10,11 @@ services:
     environment:
       POSTRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-    volumes:
-      - db_data:/var/lib/postgresql/data
+    networks:
+      - AppWeb
 
   app:
+    container_name: app
     build:
       context: .
       dockerfile: Dockerfile
@@ -24,6 +25,22 @@ services:
       - .:/app
     depends_on:
       - db
+    networks:
+      - AppWeb
+  
+  nginx:
+    container_name: nginx
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
+    ports:
+      - 80:80
+    depends_on:
+      - app
+    networks:
+      - AppWeb
 
-volumes:
-  db_data:
+networks:
+  AppWeb:
+    driver: bridge
